@@ -126,3 +126,108 @@ where
 lazy_static! {
     static ref REGEX_CACHE: Mutex<BTreeMap<String, Regex>> = Mutex::default();
 }
+
+pub trait ArrayExt<T> {
+    fn from_fn(f: impl FnMut() -> T) -> Self;
+}
+
+impl<T> ArrayExt<T> for [T; 2] {
+    fn from_fn(mut f: impl FnMut() -> T) -> Self {
+        [f(), f()]
+    }
+}
+
+impl<T> ArrayExt<T> for [T; 3] {
+    fn from_fn(mut f: impl FnMut() -> T) -> Self {
+        [f(), f(), f()]
+    }
+}
+
+pub fn array_split<'a, C>(input: &'a str, separator: &str) -> C
+where
+    C: ArrayExt<&'a str>,
+{
+    let mut it = input.split(separator);
+
+    let arr = C::from_fn(|| it.next().expect("not enough parts"));
+
+    if it.next().is_some() {
+        panic!("extraneous part")
+    }
+
+    arr
+}
+
+pub fn array_split_parse<'a, T: FromStr, C: ArrayExt<T>>(input: &'a str, separator: &str) -> C
+where
+    C: ArrayExt<T>,
+    T::Err: Debug,
+{
+    let mut it = input.split(separator);
+
+    let arr = C::from_fn(|| {
+        it.next()
+            .expect("not enough parts")
+            .parse::<T>()
+            .expect("failed to parse part")
+    });
+
+    if it.next().is_some() {
+        panic!("extraneous part")
+    }
+
+    arr
+}
+
+pub trait TupleExt<T> {
+    fn from_fn(f: impl FnMut() -> T) -> Self;
+}
+
+impl<T> TupleExt<T> for (T, T) {
+    fn from_fn(mut f: impl FnMut() -> T) -> Self {
+        (f(), f())
+    }
+}
+
+impl<T> TupleExt<T> for (T, T, T) {
+    fn from_fn(mut f: impl FnMut() -> T) -> Self {
+        (f(), f(), f())
+    }
+}
+
+pub fn tuple_split<'a, C>(input: &'a str, separator: &str) -> C
+where
+    C: TupleExt<&'a str>,
+{
+    let mut it = input.split(separator);
+
+    let tuple = C::from_fn(|| it.next().expect("not enough parts"));
+
+    if it.next().is_some() {
+        panic!("extraneous part")
+    }
+
+    tuple
+}
+
+pub fn tuple_split_parse<'a, T, C>(input: &'a str, separator: &str) -> C
+where
+    C: TupleExt<T>,
+    T: FromStr,
+    T::Err: Debug,
+{
+    let mut it = input.split(separator);
+
+    let tuple = C::from_fn(|| {
+        it.next()
+            .expect("not enough parts")
+            .parse::<T>()
+            .expect("failed to parse part")
+    });
+
+    if it.next().is_some() {
+        panic!("extraneous part")
+    }
+
+    tuple
+}
