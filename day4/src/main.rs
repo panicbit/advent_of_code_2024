@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::iter;
 
 use aoc::aoc;
+use itertools::Itertools;
 
 #[aoc(2024, 4, 1)]
 fn main(input: &str) -> usize {
@@ -45,11 +46,8 @@ fn word_occurrences<'a>(
     word: &'a str,
 ) -> impl Iterator<Item = (Position, Direction)> + 'a {
     grid.keys()
-        .flat_map(|position| {
-            DIRECTIONS
-                .iter()
-                .map(move |direction| (*position, *direction))
-        })
+        .copied()
+        .cartesian_product(DIRECTIONS)
         .filter(|(position, direction)| is_word_in_direction(grid, word, *position, *direction))
 }
 
