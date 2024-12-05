@@ -1,4 +1,5 @@
-/target
+target/
 input.txt
 input
 .DS_Store
+.mypy_cache/
