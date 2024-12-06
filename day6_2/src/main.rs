@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::iter;
 
 use aoc::aoc;
+use itertools::Itertools;
 
 #[aoc(2024, 6, 2)]
 fn main(input: &str) -> usize {
@@ -11,9 +12,10 @@ fn main(input: &str) -> usize {
 }
 
 fn looping_blockades(grid: &Grid) -> impl Iterator<Item = Position> + '_ {
-    grid.iter()
-        .filter(|&(position, cell)| {
-            if *cell != '.' {
+    guard_path(grid)
+        .map(|((x, y), (xd, yd))| (x + xd, y + yd))
+        .filter(|position| {
+            if grid.get(position) != Some(&'.') {
                 return false;
             }
 
@@ -23,7 +25,7 @@ fn looping_blockades(grid: &Grid) -> impl Iterator<Item = Position> + '_ {
 
             path_contains_loop(guard_path(&grid))
         })
-        .map(|(position, _)| *position)
+        .unique()
 }
 
 fn path_contains_loop(path: impl Iterator<Item = (Position, Direction)>) -> bool {
@@ -43,20 +45,23 @@ fn guard_path(grid: &Grid) -> impl Iterator<Item = (Position, Direction)> + '_ {
     let (mut x, mut y) = find_start_position(grid);
     let (mut xd, mut yd) = directions.next().unwrap();
 
-    iter::once(((x, y), (xd, yd))).chain(iter::from_fn(move || loop {
+    iter::from_fn(move || {
+        if !grid.contains_key(&(x, y)) {
+            return None;
+        }
+
+        let result = Some(((x, y), (xd, yd)));
         let next_position = (x + xd, y + yd);
 
-        let cell = grid.get(&next_position)?;
-
-        if *cell == '#' {
+        if grid.get(&next_position) == Some(&'#') {
             (xd, yd) = directions.next().unwrap();
-            continue;
+            return result;
         }
 
         (x, y) = next_position;
 
-        return Some((next_position, (xd, yd)));
-    }))
+        result
+    })
 }
 
 fn find_start_position(grid: &Grid) -> Position {
