@@ -35,7 +35,7 @@ fn parse_grid(input: &str) -> Grid {
 
 fn looping_blockades(grid: &Grid) -> impl Iterator<Item = Position> + '_ {
     guard_path(grid)
-        .map(|(position, direction)| position + direction)
+        .map(|(position, _)| position)
         .filter(|position| {
             if grid.get(position) != Some(&'.') {
                 return false;
