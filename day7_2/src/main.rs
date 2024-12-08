@@ -41,15 +41,16 @@ impl Equation {
     fn can_be_true(&self) -> bool {
         for operations in possible_operations(self.values.len() - 1) {
             let mut values = self.values.iter().copied();
-            let first = values.next().unwrap();
-            let result = values
-                .zip(operations)
-                .fold(first, |acc, (value, op)| match op {
-                    "+" => acc + value,
-                    "*" => acc * value,
-                    "||" => format!("{acc}{value}").i64(),
+            let mut result = values.next().unwrap();
+
+            for (value, op) in values.zip(operations) {
+                result = match op {
+                    "+" => result + value,
+                    "*" => result * value,
+                    "||" => format!("{result}{value}").i64(),
                     _ => panic!("unknown op: {op}"),
-                });
+                }
+            }
 
             if result == self.test_value {
                 return true;
