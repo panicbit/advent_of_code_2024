@@ -16,7 +16,7 @@ def generate_project [
     day: int,
     part: int,
 ] {
-    mut project_name = $"day($day)"
+    mut project_name = $"day($day | fill -a right -c 0 -w 2)"
 
     if $part != 1 {
         $project_name = $"($project_name)_($part)"
