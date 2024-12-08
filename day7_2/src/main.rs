@@ -11,7 +11,7 @@ fn main(input: &str) -> i64 {
     equations
         .iter()
         .filter(|equation| equation.can_be_true())
-        .map(|equation| equation.left)
+        .map(|equation| equation.test_value)
         .sum()
 }
 
@@ -25,24 +25,24 @@ fn possible_operations(len: usize) -> impl Iterator<Item = Vec<&'static str>> {
 
 #[derive(Debug)]
 struct Equation {
-    left: i64,
-    right: Vec<i64>,
+    test_value: i64,
+    values: Vec<i64>,
 }
 
 impl Equation {
     fn parse(equation: &str) -> Self {
-        let (left, right) = tuple_split(equation, ": ");
-        let left = left.i64();
-        let right = right.split(" ").map(<_>::i64).collect();
+        let (test_value, values) = tuple_split(equation, ": ");
+        let test_value = test_value.i64();
+        let values = values.split(" ").map(<_>::i64).collect();
 
-        Self { left, right }
+        Self { test_value, values }
     }
 
     fn can_be_true(&self) -> bool {
-        for operations in possible_operations(self.right.len() - 1) {
-            let mut right = self.right.iter().copied();
-            let first = right.next().unwrap();
-            let value = right
+        for operations in possible_operations(self.values.len() - 1) {
+            let mut values = self.values.iter().copied();
+            let first = values.next().unwrap();
+            let result = values
                 .zip(operations)
                 .fold(first, |acc, (value, op)| match op {
                     "+" => acc + value,
@@ -51,7 +51,7 @@ impl Equation {
                     _ => panic!("unknown op: {op}"),
                 });
 
-            if value == self.left {
+            if result == self.test_value {
                 return true;
             }
         }
