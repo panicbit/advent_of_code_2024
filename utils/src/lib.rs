@@ -45,6 +45,7 @@ pub trait StrExt {
     fn u8(&self) -> u8;
     fn i32(&self) -> i32;
     fn u32(&self) -> u32;
+    fn i64(&self) -> i64;
     fn usize(&self) -> usize;
     fn char(&self) -> char;
     fn is_match(&self, regex: &str) -> bool;
@@ -61,6 +62,10 @@ impl<S: AsRef<str>> StrExt for S {
 
     fn u32(&self) -> u32 {
         self.as_ref().u32()
+    }
+
+    fn i64(&self) -> i64 {
+        self.as_ref().i64()
     }
 
     fn usize(&self) -> usize {
@@ -86,6 +91,10 @@ impl StrExt for str {
     }
 
     fn u32(&self) -> u32 {
+        self.parse().unwrap()
+    }
+
+    fn i64(&self) -> i64 {
         self.parse().unwrap()
     }
 
