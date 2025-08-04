@@ -1,4 +1,4 @@
-use std::{fmt, iter, ops::RangeInclusive};
+use std::{iter, ops::RangeInclusive};
 
 use aoc::aoc;
 use itertools::Itertools;
@@ -11,9 +11,7 @@ fn main(input: &str) -> usize {
         let gap = gaps(&disk).find(|gap| gap.len() >= file.len() && gap.end < file.span.start);
 
         if let Some(gap) = gap {
-            if gap.len() >= file.len() {
-                move_file(&mut disk, file, gap);
-            }
+            move_file(&mut disk, file, gap);
         }
     }
 
@@ -79,37 +77,19 @@ fn gaps(blocks: &[Block]) -> impl Iterator<Item = Span> + use<'_> {
 }
 
 fn move_file(disk: &mut [Block], file_span: FileSpan, gap: Span) {
-    assert!(gap.len() >= file_span.len());
+    debug_assert!(gap.len() >= file_span.len());
 
-    for i in gap.into_iter().take(file_span.len()) {
-        disk[i] = Block {
-            id: file_span.id,
-            is_file: true,
-        };
-    }
+    let (gap_area, file_area) = disk.split_at_mut(file_span.span.start);
+    let gap_area = &mut gap_area[gap.start..][..file_span.len()];
+    let file_area = &mut file_area[..file_span.len()];
 
-    for i in file_span.span {
-        disk[i] = Block {
-            id: 0,
-            is_file: false,
-        }
-    }
+    gap_area.swap_with_slice(file_area);
 }
 
 #[derive(Copy, Clone)]
 struct Block {
     id: usize,
     is_file: bool,
-}
-
-impl fmt::Debug for Block {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_file {
-            write!(f, "[{}]", self.id)
-        } else {
-            write!(f, ".")
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -170,7 +150,7 @@ impl FileSpan {
     }
 
     pub fn joined_with(&self, other: &Self) -> Self {
-        assert_eq!(self.id, other.id);
+        debug_assert_eq!(self.id, other.id);
 
         Self {
             id: self.id,
