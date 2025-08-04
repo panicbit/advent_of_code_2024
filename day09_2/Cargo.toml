@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 aoc = "0.6.1"
+itertools = "0.14.0"
 utils = { version = "0.1.0", path = "../utils" }
