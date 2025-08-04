@@ -16,14 +16,13 @@ fn main(input: &str) -> usize {
         .collect::<Mountain>();
 
     let result = trails(&mountain)
-        .map(|trail| paths(&mountain, trail).len())
+        .map(|trail| paths(&mountain, trail))
         .sum::<usize>();
 
     result
 }
 
 type Mountain = BTreeMap<Pos, u32>;
-type Paths = BTreeSet<Vec<Pos>>;
 type Pos = (isize, isize);
 type Trail = Pos;
 
@@ -34,38 +33,30 @@ fn trails(mountain: &Mountain) -> impl Iterator<Item = Pos> + use<'_> {
         .map(|(pos, _)| *pos)
 }
 
-fn paths(mountain: &Mountain, trail: Trail) -> Paths {
-    let mut paths = Paths::new();
+fn paths(mountain: &Mountain, trail: Trail) -> usize {
     let elevation = 0;
 
     assert_eq!(mountain.get(&trail), Some(&elevation));
 
-    summits_rec(mountain, trail, elevation, &mut paths, &mut Vec::new());
-
-    paths
+    summits_rec(mountain, trail, elevation)
 }
 
-fn summits_rec(
-    mountain: &Mountain,
-    trail: Trail,
-    elevation: u32,
-    summits: &mut Paths,
-    path: &mut Vec<Pos>,
-) {
+fn summits_rec(mountain: &Mountain, trail: Trail, elevation: u32) -> usize {
     if elevation == 9 {
-        summits.insert(path.clone());
-        return;
+        return 1;
     }
+
+    let mut num_paths = 0;
 
     for (pos, next_elevation) in neighbours(mountain, trail) {
         if elevation + 1 != next_elevation {
             continue;
         }
 
-        path.push(pos);
-        summits_rec(mountain, pos, next_elevation, summits, path);
-        path.pop();
+        num_paths += summits_rec(mountain, pos, next_elevation);
     }
+
+    num_paths
 }
 
 #[allow(clippy::identity_op)]
