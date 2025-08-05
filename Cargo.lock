@@ -353,6 +353,7 @@ name = "day12_2"
 version = "0.1.0"
 dependencies = [
  "aoc",
+ "itertools 0.14.0",
  "utils",
 ]
 
