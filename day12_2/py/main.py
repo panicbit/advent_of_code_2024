@@ -69,22 +69,23 @@ class Garden:
     
     def region(self, plot: Plot, label: Label) -> "Region":
         plots: Set[Plot] = set()
+        to_check: Set[Plot] = set([plot])
 
-        self.region_rec(plot, label, plots)
+        while to_check:
+            plot = to_check.pop()
+
+            if plot in plots:
+                continue
+
+            if self.plot_labels.get(plot) != label:
+                continue
+
+            plots.add(plot)
+
+            for neighbour in neighbours(plot): 
+                to_check.add(neighbour)
 
         return Region(label, plots)
-
-    def region_rec(self, plot: Plot, label: Label, plots: Set[Plot]) -> None:
-        if plot in plots:
-            return
-
-        if self.plot_labels.get(plot) != label:
-            return
-
-        plots.add(plot)
-
-        for neighbour in neighbours(plot): 
-            self.region_rec(neighbour, label, plots)
 
 @dataclass
 class Region:
